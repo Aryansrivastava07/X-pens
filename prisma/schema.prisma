@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Tag {
+  id        String       @id @default(uuid())
+  name      String       @unique
+  color     String       @default("#10b981")
+  createdAt DateTime     @default(now())
+  expenses  ExpenseTag[]
+}
+
+model Expense {
+  id            String       @id @default(uuid())
+  amount        Float
+  currency      String       @default("INR")
+  category      String
+  description   String
+  merchant      String?
+  date          String
+  time          String
+  paymentMethod String
+  type          String       @default("expense")
+  rawInput      String?
+  createdAt     DateTime     @default(now())
+  tags          ExpenseTag[]
+}
+
+model ExpenseTag {
+  id        String   @id @default(uuid())
+  expenseId String
+  tagId     String
+  expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, tagId])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
